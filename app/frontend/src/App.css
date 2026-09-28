@@ -1,0 +1,15 @@
+.container {
+  max-width: 480px;
+  margin: 3rem auto;
+  font-family: system-ui, sans-serif;
+}
+
+.status { font-weight: 600; }
+.status.online { color: #16a34a; }
+.status.offline { color: #dc2626; }
+.status.checking { color: #6b7280; }
+
+button {
+  padding: 0.5rem 1rem;
+  cursor: pointer;
+}
