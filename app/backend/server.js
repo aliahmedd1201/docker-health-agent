@@ -11,8 +11,9 @@ function log(level, message, extra = {}) {
   console.log(JSON.stringify({ time: new Date().toISOString(), level, message, ...extra }));
 }
 
-// Har request ka log
+// Log every request (skip noisy health checks)
 app.use((req, res, next) => {
+  if (req.path === "/health") return next();
   const start = Date.now();
   res.on("finish", () => {
     log("info", "request", { method: req.method, path: req.path, status: res.statusCode, ms: Date.now() - start });
