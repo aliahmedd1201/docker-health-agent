@@ -1,0 +1,19 @@
+# Node
+node_modules/
+dist/
+
+# Secrets (kabhi Git mein nahi)
+.env
+
+# Logs
+*.log
+
+# Python
+__pycache__/
+.venv/
+
+# Terraform
+.terraform/
+*.tfstate
+*.tfstate.*
+*.tfvars
