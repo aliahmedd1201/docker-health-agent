@@ -1,0 +1,75 @@
+# Docker Health Agent: demo app + Temporal + AI agent worker
+services:
+  backend:
+    build: ./app/backend
+    image: backend:local
+    container_name: backend
+    environment:
+      API_KEY: ${API_KEY:?Set API_KEY in .env}
+    restart: unless-stopped
+    mem_limit: 256m
+    cpus: 0.5
+    logging: &default-logging
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  frontend:
+    build: ./app/frontend
+    image: frontend:local
+    container_name: frontend
+    ports:
+      - "8081:8080"
+    depends_on:
+      backend:
+        condition: service_healthy
+    restart: unless-stopped
+    mem_limit: 128m
+    cpus: 0.25
+    logging: *default-logging
+
+  temporal:
+    image: temporalio/temporal:latest
+    container_name: temporal
+    command: ["server", "start-dev", "--ip", "0.0.0.0"]
+    ports:
+      - "127.0.0.1:7233:7233"   # gRPC: worker and client
+      - "127.0.0.1:8233:8233"   # Web UI
+    restart: unless-stopped
+    mem_limit: 512m
+    logging: *default-logging
+
+  # The agent never gets the raw Docker socket: this proxy only allows
+  # reading containers and restarting them (no create, delete or exec)
+  docker-proxy:
+    image: tecnativa/docker-socket-proxy:latest
+    container_name: docker-proxy
+    environment:
+      CONTAINERS: 1
+      ALLOW_RESTARTS: 1
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    restart: unless-stopped
+    mem_limit: 64m
+    logging: *default-logging
+
+  worker:
+    build: ./agent
+    image: agent-worker:local
+    container_name: worker
+    environment:
+      TEMPORAL_HOST: temporal:7233
+      DOCKER_HOST: tcp://docker-proxy:2375
+      AWS_PROFILE: ${AWS_PROFILE:-default}
+      AWS_REGION: ${AWS_REGION:-us-east-1}
+      BEDROCK_MODEL_ID: ${BEDROCK_MODEL_ID:-us.anthropic.claude-haiku-4-5-20251001-v1:0}
+    volumes:
+      # AWS credentials from the host; writable so short-lived sessions can refresh
+      - ${HOME}/.aws:/home/app/.aws
+    depends_on:
+      - temporal
+      - docker-proxy
+    restart: unless-stopped
+    mem_limit: 512m
+    logging: *default-logging

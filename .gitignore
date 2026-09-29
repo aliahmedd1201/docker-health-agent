@@ -1,19 +1,22 @@
+# Secrets
+.env
+
 # Node
 node_modules/
 dist/
 
-# Secrets (kabhi Git mein nahi)
-.env
-
-# Logs
-*.log
-
 # Python
 __pycache__/
+*.pyc
 .venv/
+.pytest_cache/
 
 # Terraform
 .terraform/
 *.tfstate
 *.tfstate.*
 *.tfvars
+
+# Logs and OS files
+*.log
+.DS_Store
