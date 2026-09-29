@@ -42,7 +42,7 @@ flowchart LR
 **Prerequisites:** Docker with Compose v2, an AWS account with Bedrock access (see [docs/BEDROCK-SETUP.md](docs/BEDROCK-SETUP.md)), and AWS credentials in `~/.aws`.
 
 ```bash
-git clone https://github.com/<your-username>/docker-health-agent.git
+git clone https://github.com/aliahmedd1201/docker-health-agent.git
 cd docker-health-agent
 cp .env.example .env            # set API_KEY, and your AWS profile/region if needed
 docker compose up -d --build
